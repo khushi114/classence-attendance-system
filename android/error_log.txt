@@ -1,0 +1,67 @@
+﻿> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+
+> Configure project :app
+w: file:///D:/attendance_system/android/app/build.gradle.kts:19:9: 'jvmTarget: String' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+.\gradlew.bat : 
+At line:1 char:1
++ .\gradlew.bat 
+assembleDebug 2>&1 | 
+Out-File 
+error_log.txt 
+-Encoding u ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (:String   
+ ) [], RemoteExce    
+ption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+FAILURE: Build 
+failed with an 
+exception.
+
+* Where:
+Build file 'D:\attend
+ance_system\android\b
+uild.gradle.kts' 
+line: 19
+
+* What went wrong:
+A problem occurred 
+configuring project 
+':app'.
+> [CXX1101] NDK at C:
+\Users\khush\AppData\
+Local\Android\sdk\ndk
+\28.2.13676358 did 
+not have a 
+source.properties 
+file
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to 
+get more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at ht
+tps://help.gradle.org
+.
+
+BUILD FAILED in 10s
+4 actionable tasks: 4 up-to-date

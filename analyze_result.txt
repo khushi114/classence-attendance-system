@@ -1,0 +1,39 @@
+﻿Analyzing attendance_system...                                  
+
+   info - Don't invoke 'print' in production code - lib\core\services\face_embedding_service.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\firebase_auth_service.dart:82:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\firebase_auth_service.dart:94:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:163:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:216:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:243:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:251:51 - deprecated_member_use
+   info - Invalid use of a private type in a public API - lib\features\verification\presentation\verification_screen.dart:16:3 - library_private_types_in_public_api
+   info - Don't invoke 'print' in production code - lib\features\verification\presentation\verification_screen.dart:90:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\verification\presentation\verification_screen.dart:231:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\verification\presentation\verification_screen.dart:323:60 - deprecated_member_use
+warning - The value of the field '_currentStep' isn't used - lib\screens\attendance_screen.dart:19:7 - unused_field
+warning - Unused import: 'package:attendance_system/features/verification/presentation/verification_screen.dart' - lib\screens\student_dashboard.dart:7:8 - unused_import
+warning - Unused import: 'package:attendance_system/features/verification/domain/entities/user_registration.dart' - lib\screens\student_dashboard.dart:8:8 - unused_import
+  error - The named parameter 'listenable' is required, but there's no corresponding argument - lib\widgets\custom_button.dart:62:14 - missing_required_argument
+  error - The named parameter 'animation' isn't defined - lib\widgets\custom_button.dart:63:9 - undefined_named_parameter
+
+flutter : 16 issues 
+found. (ran in 3.3s)
+At line:1 char:1
++ flutter analyze 
+2>&1 | Out-File 
+-FilePath "d:\attenda
+nce_system\analy ...
++ 
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (16 issu   
+ es found. (ran i    
+n 3.3s):String)     
+[], RemoteExcept    
+ion
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 

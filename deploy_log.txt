@@ -1,0 +1,8 @@
+
+[1m[37m===[39m Deploying to 'attendance-system-9aced'...[22m
+
+[36m[1mi [22m[39m deploying [1mfirestore[22m
+[36m[1mi [22m[39m [1m[36mfirestore:[39m[22m reading indexes from [1mfirestore.indexes.json[22m...
+[36m[1mi  cloud.firestore:[22m[39m checking [1mfirestore.rules[22m for compilation errors...
+
+[1m[31mError:[39m[22m Request to https://firebaserules.googleapis.com/v1/projects/attendance-system-9aced:test had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.

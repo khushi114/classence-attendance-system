@@ -1,0 +1,34 @@
+﻿Analyzing attendance_system...                                  
+
+   info - Don't invoke 'print' in production code - lib\core\services\face_embedding_service.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\firebase_auth_service.dart:82:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\firebase_auth_service.dart:94:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:163:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:216:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:243:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\presentation\dashboard_screen.dart:251:51 - deprecated_member_use
+   info - Invalid use of a private type in a public API - lib\features\verification\presentation\verification_screen.dart:16:3 - library_private_types_in_public_api
+   info - Don't invoke 'print' in production code - lib\features\verification\presentation\verification_screen.dart:90:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\verification\presentation\verification_screen.dart:231:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\verification\presentation\verification_screen.dart:323:60 - deprecated_member_use
+
+flutter : 11 issues 
+found. (ran in 3.3s)
+At line:1 char:1
++ flutter analyze 
+2>&1 | Out-File 
+-FilePath "d:\attenda
+nce_system\analy ...
++ 
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (11 issu   
+ es found. (ran i    
+n 3.3s):String)     
+[], RemoteExcept    
+ion
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
