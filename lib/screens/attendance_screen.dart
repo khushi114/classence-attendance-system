@@ -7,6 +7,11 @@ import 'package:attendance_system/features/sessions/data/session_service.dart';
 import 'package:attendance_system/features/sessions/domain/session_model.dart';
 import 'package:attendance_system/features/attendance/data/attendance_service.dart';
 import 'package:attendance_system/widgets/custom_button.dart';
+import 'package:attendance_system/core/services/geolocation_service.dart';
+import 'package:attendance_system/core/services/bluetooth_service.dart';
+import 'package:attendance_system/features/attendance/domain/geo_verification_result.dart';
+import 'package:attendance_system/features/attendance/domain/ble_verification_result.dart';
+import 'package:attendance_system/features/classes/data/class_service.dart';
 
 /// Multi-step attendance screen with animated step indicators.
 ///
@@ -21,10 +26,14 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen>
     with TickerProviderStateMixin {
   final _sessionService = SessionService();
+  final _classService = ClassService();
+  final _geoService = GeolocationService();
+  final _bleService = BluetoothService();
   final _sessionCodeController = TextEditingController();
 
   bool _isSessionVerified = false;
   SessionModel? _activeSession;
+  GeoVerificationResult? _geoVerificationResult;
 
   int _currentStep = 0;
   final List<_StepStatus> _steps = [
@@ -89,25 +98,57 @@ class _AttendanceScreenState extends State<AttendanceScreen>
   }
 
   Future<void> _startVerificationFlow() async {
-    // Step 1: Bluetooth Check (Simulation for now)
-    // TODO: Integrate actual BLE check using _activeSession.bluetoothBeaconId
+    // Step 1: Bluetooth Check with real BLE verification
     setState(() {
       _currentStep = 0;
       _steps[0] = _StepStatus.inProgress;
-      _statusMessage = 'Checking Bluetooth connection...';
+      _statusMessage = 'Scanning for classroom beacon...';
     });
     _animateProgress(0.0, 0.33);
-    await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-    setState(() {
-      _steps[0] = _StepStatus.success;
-      _statusMessage = 'Bluetooth connected ✓';
-    });
+    // Check if session has a beacon ID configured
+    if (_activeSession!.bluetoothBeaconId == null ||
+        _activeSession!.bluetoothBeaconId!.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _steps[0] = _StepStatus.success; // Skip if no beacon configured
+        _statusMessage = 'Bluetooth check skipped (no beacon configured) ✓';
+      });
+      await Future.delayed(const Duration(milliseconds: 500));
+    } else {
+      // Perform BLE verification
+      try {
+        final bleResult = await _bleService.verifyProximity(
+          beaconUuid: _activeSession!.bluetoothBeaconId!,
+        );
+
+        if (!mounted) return;
+        if (bleResult.bluetoothVerified) {
+          setState(() {
+            _steps[0] = _StepStatus.success;
+            _statusMessage =
+                'Beacon detected ✓ (RSSI: ${bleResult.rssiAverage?.toStringAsFixed(1)} dBm)';
+          });
+        } else {
+          setState(() {
+            _steps[0] = _StepStatus.failed;
+            _statusMessage =
+                bleResult.errorMessage ?? 'Beacon verification failed';
+          });
+          return; // Stop if Bluetooth verification fails
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _steps[0] = _StepStatus.failed;
+          _statusMessage = 'Error scanning beacon: ${e.toString()}';
+        });
+        return;
+      }
+    }
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Step 2: Location Check (Simulation for now)
-    // TODO: Integrate actual Geolocator check using _activeSession.location
+    // Step 2: Location Check with actual geolocation verification
     if (!mounted) return;
     setState(() {
       _currentStep = 1;
@@ -115,13 +156,64 @@ class _AttendanceScreenState extends State<AttendanceScreen>
       _statusMessage = 'Verifying location...';
     });
     _animateProgress(0.33, 0.66);
-    await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-    setState(() {
-      _steps[1] = _StepStatus.success;
-      _statusMessage = 'Location verified ✓';
-    });
+    // Fetch classroom location from database
+    try {
+      final classData = await _classService.getClass(_activeSession!.classId);
+
+      if (classData == null) {
+        if (!mounted) return;
+        setState(() {
+          _steps[1] = _StepStatus.failed;
+          _statusMessage = 'Classroom not found.';
+        });
+        return;
+      }
+
+      // Check if classroom has geolocation configured
+      if (classData.latitude == null || classData.longitude == null) {
+        if (!mounted) return;
+        setState(() {
+          _steps[1] = _StepStatus.failed;
+          _statusMessage =
+              'Classroom location not configured. Contact faculty.';
+        });
+        return;
+      }
+
+      // Perform geolocation verification
+      final geoResult = await _geoService.verifyProximity(
+        classLatitude: classData.latitude!,
+        classLongitude: classData.longitude!,
+        allowedRadiusMeters: classData.allowedRadiusMeters ?? 30.0,
+      );
+
+      _geoVerificationResult = geoResult;
+
+      if (!mounted) return;
+      if (geoResult.geoVerified) {
+        setState(() {
+          _steps[1] = _StepStatus.success;
+          _statusMessage =
+              'Location verified ✓ (${geoResult.distanceMeters?.toStringAsFixed(1)}m from classroom)';
+        });
+      } else {
+        setState(() {
+          _steps[1] = _StepStatus.failed;
+          _statusMessage =
+              geoResult.errorMessage ?? 'Location verification failed';
+        });
+        return;
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _steps[1] = _StepStatus.failed;
+        _statusMessage = 'Error verifying location: ${e.toString()}';
+      });
+      return;
+    }
+
     await Future.delayed(const Duration(milliseconds: 500));
 
     // Step 3: Face Scan
@@ -196,10 +288,11 @@ class _AttendanceScreenState extends State<AttendanceScreen>
           studentId: user.uid,
           classId: _activeSession!.classId,
           bluetoothVerified: true, // TODO: Use real check result
-          geoVerified: true, // TODO: Use real check result
+          geoVerified: _geoVerificationResult?.geoVerified ?? false,
           faceVerified: true,
           livenessVerified: true, // VerificationScreen implies liveness
           confidenceScore: result['confidence_score'] ?? 1.0,
+          metadata: _geoVerificationResult?.toMap(),
         );
 
         if (mounted) {

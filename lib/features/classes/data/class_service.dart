@@ -115,16 +115,7 @@ class ClassService {
   }
 
   /// Update class details.
-  Future<void> updateClass({
-    required String classId,
-    String? name,
-    String? schedule,
-    String? department,
-  }) async {
-    final updates = <String, dynamic>{};
-    if (name != null) updates['name'] = name;
-    if (schedule != null) updates['schedule'] = schedule;
-    if (department != null) updates['department'] = department;
+  Future<void> updateClass(String classId, Map<String, dynamic> updates) async {
     if (updates.isNotEmpty) {
       await _classesRef.doc(classId).update(updates);
     }

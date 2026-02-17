@@ -11,6 +11,11 @@ class ClassModel {
   final String schedule; // e.g. "Mon/Wed/Fri 10:00-11:00"
   final DateTime createdAt;
 
+  // Geolocation fields for proximity verification
+  final double? latitude;
+  final double? longitude;
+  final double? allowedRadiusMeters; // Default: 30 meters
+
   ClassModel({
     required this.id,
     required this.name,
@@ -20,6 +25,9 @@ class ClassModel {
     this.studentIds = const [],
     this.schedule = '',
     required this.createdAt,
+    this.latitude,
+    this.longitude,
+    this.allowedRadiusMeters,
   });
 
   Map<String, dynamic> toMap() {
@@ -31,6 +39,9 @@ class ClassModel {
       'studentIds': studentIds,
       'schedule': schedule,
       'createdAt': Timestamp.fromDate(createdAt),
+      'latitude': latitude,
+      'longitude': longitude,
+      'allowedRadiusMeters': allowedRadiusMeters,
     };
   }
 
@@ -44,6 +55,15 @@ class ClassModel {
       studentIds: List<String>.from(map['studentIds'] ?? []),
       schedule: map['schedule'] ?? '',
       createdAt: (map['createdAt'] as Timestamp).toDate(),
+      latitude: map['latitude'] != null
+          ? (map['latitude'] as num).toDouble()
+          : null,
+      longitude: map['longitude'] != null
+          ? (map['longitude'] as num).toDouble()
+          : null,
+      allowedRadiusMeters: map['allowedRadiusMeters'] != null
+          ? (map['allowedRadiusMeters'] as num).toDouble()
+          : null,
     );
   }
 
@@ -53,6 +73,9 @@ class ClassModel {
     String? department,
     List<String>? studentIds,
     String? schedule,
+    double? latitude,
+    double? longitude,
+    double? allowedRadiusMeters,
   }) {
     return ClassModel(
       id: id,
@@ -63,6 +86,9 @@ class ClassModel {
       studentIds: studentIds ?? this.studentIds,
       schedule: schedule ?? this.schedule,
       createdAt: createdAt,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      allowedRadiusMeters: allowedRadiusMeters ?? this.allowedRadiusMeters,
     );
   }
 
