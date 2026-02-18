@@ -14,8 +14,8 @@ import 'package:attendance_system/features/attendance/domain/ble_verification_re
 /// - Handle scan timeout
 class BluetoothService {
   /// RSSI threshold for proximity verification (in dBm)
-  /// -70 dBm is typical classroom proximity
-  static const int rssiThreshold = -70;
+  /// -85 dBm allows detection within ~15 meters
+  static const int rssiThreshold = -85;
 
   /// Scan timeout duration in seconds
   static const int scanTimeoutSeconds = 10;

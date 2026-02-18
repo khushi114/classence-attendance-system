@@ -12,6 +12,7 @@ import 'package:attendance_system/features/timetable/data/timetable_service.dart
 import 'package:attendance_system/features/classes/domain/class_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart'; // for Clipboard
+import 'package:attendance_system/core/services/beacon_advertising_service.dart';
 
 /// Faculty dashboard with Start Session, Active Sessions, and History.
 class FacultyDashboard extends StatefulWidget {
@@ -26,6 +27,7 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
   final _sessionService = SessionService();
   final _classService = ClassService();
   final _timetableService = TimetableService();
+  final _beaconService = BeaconAdvertisingService();
 
   String _userName = 'Faculty';
   List<SessionModel> _activeSessions = [];
@@ -141,6 +143,8 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
 
   Future<void> _endSession(String sessionId) async {
     try {
+      // Stop BLE advertising first
+      await _beaconService.stopAdvertising();
       await _sessionService.endSession(sessionId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -149,7 +153,8 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
             backgroundColor: AppColors.textPrimary,
           ),
         );
-        _loadData(); // Refresh to remove from list
+        _loadData();
+        setState(() {}); // Refresh BLE status indicator
       }
     } catch (e) {
       // Handle error
@@ -168,13 +173,22 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
     }
   }
 
-  void _startSession(ClassModel? classModel) {
-    showModalBottomSheet(
+  Future<void> _startSession(ClassModel? classModel) async {
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StartSessionSheet(preSelectedClass: classModel),
     );
+    if (result != null && mounted) {
+      // Start BLE advertising with the session's beacon UUID
+      if (result.bluetoothBeaconId != null &&
+          result.bluetoothBeaconId!.isNotEmpty) {
+        await _beaconService.startAdvertising(result.bluetoothBeaconId!);
+      }
+      _loadData();
+      setState(() {}); // Refresh BLE status indicator
+    }
   }
 
   @override
@@ -501,6 +515,57 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 12),
+                                // BLE Broadcasting Status
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _beaconService.isAdvertising
+                                        ? const Color(
+                                            0xFF059669,
+                                          ).withValues(alpha: 0.08)
+                                        : Colors.grey.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: _beaconService.isAdvertising
+                                          ? const Color(
+                                              0xFF059669,
+                                            ).withValues(alpha: 0.3)
+                                          : Colors.grey.withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _beaconService.isAdvertising
+                                              ? const Color(0xFF059669)
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _beaconService.isAdvertising
+                                            ? '📡 BLE Broadcasting: Active'
+                                            : '📡 BLE Broadcasting: Inactive',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: _beaconService.isAdvertising
+                                              ? const Color(0xFF059669)
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   'Session Code',
@@ -567,7 +632,7 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
                       CustomButton(
                         text: 'Start New Session',
                         onPressed: () async {
-                          final result = await showModalBottomSheet(
+                          final result = await showModalBottomSheet<dynamic>(
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
@@ -575,17 +640,31 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
                           );
 
                           if (result != null && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Session started!'),
-                                backgroundColor: AppColors.success,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            // Start BLE advertising with the session's beacon UUID
+                            if (result.bluetoothBeaconId != null &&
+                                result.bluetoothBeaconId!.isNotEmpty) {
+                              await _beaconService.startAdvertising(
+                                result.bluetoothBeaconId!,
+                              );
+                            }
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    _beaconService.isAdvertising
+                                        ? '✅ Session started! 📡 BLE beacon broadcasting'
+                                        : '✅ Session started!',
+                                  ),
+                                  backgroundColor: AppColors.success,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                              ),
-                            );
-                            _loadData(); // Refresh list
+                              );
+                              _loadData();
+                              setState(() {}); // Refresh BLE status indicator
+                            }
                           }
                         },
                         icon: Icons.play_circle_filled_rounded,

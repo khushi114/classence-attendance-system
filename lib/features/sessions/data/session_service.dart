@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:attendance_system/features/sessions/domain/session_model.dart';
 import 'package:attendance_system/core/errors/attendance_exception.dart';
+import 'package:attendance_system/core/services/beacon_advertising_service.dart';
 
 /// Service for managing attendance sessions in Firestore.
 class SessionService {
@@ -34,6 +35,15 @@ class SessionService {
     final now = DateTime.now();
     final token = _generateSecureToken();
 
+    // Generate beacon UUID
+    final beaconService = BeaconAdvertisingService();
+    String? beaconUuid = bluetoothBeaconId;
+
+    // If no beacon ID provided, generate one
+    if (beaconUuid == null || beaconUuid.isEmpty) {
+      beaconUuid = beaconService.generateBeaconUuid(classId);
+    }
+
     final docRef = _sessionsRef.doc();
     final session = SessionModel(
       id: docRef.id,
@@ -46,10 +56,12 @@ class SessionService {
       durationMinutes: durationMinutes,
       location: location,
       radiusMeters: radiusMeters,
-      bluetoothBeaconId: bluetoothBeaconId,
+      bluetoothBeaconId: beaconUuid,
     );
 
+    print('📝 Saving session with beacon UUID: $beaconUuid');
     await docRef.set(session.toMap());
+    print('✅ Session ${session.id} saved to Firestore');
     return session;
   }
 
